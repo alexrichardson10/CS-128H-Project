@@ -28,6 +28,14 @@ Have basic file I/O implemented and one table as a proof of concept.
 ### Checkpoint 2
 Have querying functions implemented and multiple supporting tables.
 
+
+## Front End
+
+The front end will contian the UI and display the login screen with a username and password space. It will receive HTTP hits and get that data back to the Back End.
+
+### Checkpoint 1
+-x-
+
 # Possible Challenges
 - Parsing database requests from the  backend.
 - Parsing file/data requests from the client.
