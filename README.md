@@ -12,7 +12,10 @@ Our end goal with this project is to build a basic web server that can support a
 
 ## Front End
 ### Checkpoint 1
+The front end will contian the UI and display the login screen with a username and password space. It will receive HTTP hits and get that data back to the Back End.
 ### Checkpoint 2
+-x-
+
 
 ## Back End
 Our back-end will parse requests from the client and query the database from information when relevant. The server will implement either the HTTP/3 or HTTP/1.1 protocol to serve requested data to the client in a timely and efficient manner. The server should also be safe against most common malicious inputs, such as SQL injection and XSS.
