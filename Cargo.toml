@@ -1,6 +1,9 @@
 [package]
-name = "CS-128H-Project"
+name = "cs_128h_project"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+hex = "0.4.3"
+num-bigint = "0.5.1"
+num-traits = "0.2.19"

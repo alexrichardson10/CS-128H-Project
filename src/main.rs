@@ -1,3 +1,5 @@
+use cs_128h_project::init;
+
 fn main() {
-    println!("Hello, world!");
+    init();
 }
