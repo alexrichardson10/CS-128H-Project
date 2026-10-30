@@ -27,7 +27,6 @@ After logging in, the user is able to see some data about them from the database
 - A logout route that clears the session.
 - Navigation links between pages and basic styling so the site is usable.
 
-
 ## Back End
 Our back-end will parse requests from the client and query the database from information when relevant. The server will implement either the HTTP/3 or HTTP/1.1 protocol to serve requested data to the client in a timely and efficient manner. The server should also be safe against most common malicious inputs, such as SQL injection and XSS.
 ### Checkpoint 1
