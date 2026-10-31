@@ -2,41 +2,38 @@ use crate::database::ColumnType::*;
 use crate::database::Column;
 use crate::database::DbError;
 use crate::database::Schema;
+use crate::database::Row;
 
 pub fn init_tables() -> Vec<(String, Schema)> {
     let user = Schema{cols: vec![
-        (String::from("UserID"), PKey),
         (String::from("UserName"), CharVec),
         (String::from("PswdHash"), CharVec),
         (String::from("Score"), UInt),
     ]};
     vec![
-        (String::from("User"), user),
+        (String::from("user"), user),
     ]
 }
 
 pub struct User {
-    userid: u32,
     pub username: String,
     pswdhash: String,
     score: u32,
 }
 
-impl User {
-    fn new() -> Self {
-        User{userid: 0, username: String::new(), pswdhash: String::new(), score: 0}
-    }
+impl TableStruct for User {
 
-    pub fn from(data: &[Column]) -> Result<Self, DbError> {
-        if data.len() != 4 {
+    fn from(data: &Row) -> Result<Self, DbError> {
+        if data.datacols.len() != 3 {
             return Err(DbError::ColFormat);
         }
-        match data {
-            [Column::PKey(id), 
+        match &data.datacols[..] {
+            [ 
                 Column::CharVec(un), 
                 Column::CharVec(hash), 
-                Column::UInt(score)] => Ok(User{
-                    userid: *id,
+                Column::UInt(score)
+            ] => 
+                Ok(User{
                     username: un.clone(),
                     pswdhash: hash.clone(),
                     score: *score,
@@ -45,13 +42,20 @@ impl User {
         }
     }
 
-    pub fn to(&self) -> Vec<Column> {
-        vec![
-            Column::PKey(self.userid),
+    fn to(&self) -> Row {
+        Row{
+            datacols: vec![
             Column::CharVec(self.username.clone()),
             Column::CharVec(self.pswdhash.clone()),
             Column::UInt(self.score),
         ]
+        }
     }
 
+}
+
+pub trait TableStruct: Sized {
+    fn from(data: &Row) -> Result<Self, DbError>;
+
+    fn to(&self) -> Row;
 }

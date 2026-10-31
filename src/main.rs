@@ -1,14 +1,14 @@
-use cs_128h_project::database::{self, DbError};
+use cs_128h_project::database::{self, DbError, Table};
 use cs_128h_project::database::tables::{User};
 
 fn main() -> Result<(), DbError> {
     let usertable = String::from("user");
     let db: database::Database = database::new_database(String::from("maindb"))?;
-    let user_table = db.read_table(&usertable)?;
-    let user1 = User::from(&user_table[0][..])?;
-    println!("{}", user1.username);
+    let user_table: Table<User> = db.read_table(&usertable)?;
 
-
+    for row in user_table.rows() {
+        println!("{}: {}", row.0, row.1.username);
+    }
 
     Ok(())
 }
