@@ -3,10 +3,12 @@ use num_traits::{pow, One, Zero};
 
 /// Performs the x25519 key-generation algorithm on an input scalar and key. THIS VERSION
 /// IS NOT SECURE. THERE IS A TIMING SIDE-CHANNEL WHICH CAN BE EXPLOITED.
-pub fn x25519(mut k_bytes: [u8; 32], u_bytes: [u8; 32]) -> [u8; 32] {
+pub fn x25519(mut k_bytes: [u8; 32], mut u_bytes: [u8; 32]) -> [u8; 32] {
     k_bytes[0] &= 248u8;
     k_bytes[31] &= 127u8;
     k_bytes[31] |= 64u8;
+
+    u_bytes[31] &= 127u8;
 
     let k = BigUint::from_bytes_le(&k_bytes);
     let u = BigUint::from_bytes_le(&u_bytes);
