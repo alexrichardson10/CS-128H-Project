@@ -65,3 +65,36 @@ fn c_swap(swap: &BigUint, num_2: BigUint, num_3: BigUint) -> (BigUint, BigUint) 
 
     (num_2, num_3)
 }
+
+#[derive(Default)]
+pub struct Keys {
+    pub private_key: Option<Vec<u8>>,
+    pub public_key: Option<Vec<u8>>,
+    pub shared_secret: Option<Vec<u8>>
+}
+
+impl Keys {
+    pub fn new() -> Keys {
+        let mut result: Keys = Keys::default();
+
+        let mut scalar_bytes: Vec<u8> = BigUint::to_bytes_le(&BigUint::from(9u32));
+        scalar_bytes.resize(32, 0u8);
+
+        result.private_key = Some(Vec::from(rand::random::<[u8; 32]>()));
+        result.public_key = Some(Vec::from(x25519(
+            result.private_key.clone().unwrap().try_into().unwrap(),
+            scalar_bytes.try_into().unwrap()
+        )));
+
+        result
+    }
+
+    pub fn calculate_shared_secret(&mut self, client_public_key: Vec<u8>) -> Vec<u8> {
+        self.shared_secret = Some(Vec::from(x25519(
+            self.private_key.clone().unwrap().try_into().unwrap(),
+            client_public_key.try_into().unwrap()
+        )));
+        
+        self.shared_secret.clone().unwrap()
+    }
+}
