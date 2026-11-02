@@ -2,7 +2,7 @@ use crate::backend::crypto::hkdf::{derive_secret, hkdf_extract};
 use crate::backend::crypto::diffie_hellman::{Keys};
 
 #[derive(Default)]
-pub struct KeySchedule {
+pub struct TlsKeySchedule {
     server_keys: Option<Keys>,
     early_secret: Option<Vec<u8>>,
     binder_key: Option<Vec<u8>>,
@@ -18,9 +18,9 @@ pub struct KeySchedule {
     resumption_master_secret: Option<Vec<u8>>
 }
 
-impl KeySchedule {
-    pub fn new() -> KeySchedule {
-        let mut result: KeySchedule = Default::default();
+impl TlsKeySchedule {
+    pub fn new() -> TlsKeySchedule {
+        let mut result: TlsKeySchedule = Default::default();
 
         let mut zero_vec: Vec<u8> = Vec::new();
         zero_vec.resize(32, 0);

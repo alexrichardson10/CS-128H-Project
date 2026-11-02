@@ -1,6 +1,8 @@
 use crate::backend::crypto::diffie_hellman;
 use crate::backend::crypto::hkdf::{hkdf_expand, hkdf_extract};
 use num_bigint::BigUint;
+use crate::backend::crypto::quic::QuicKeySchedule;
+use crate::init;
 
 #[test]
 /// Tests the x25519 implementation against the RFC 7748 test keys found at
@@ -239,4 +241,69 @@ pub fn hkdf() {
 
     assert_eq!(prk_3, solved_prk_3);
     assert_eq!(okm_3, solved_okm_3);
+}
+
+/// Tests the QUIC key generation against the test vector found at
+/// https://www.rfc-editor.org/info/rfc9001/
+#[test]
+pub fn quic() {
+    // Test Vector A per RFC 9001 §A
+    let destination_connection_id_str: &str = "8394c8f03e515708";
+    let mut destination_connection_id: Vec<u8> = hex::decode(destination_connection_id_str).unwrap();
+    destination_connection_id.resize(8, 0);
+
+    let initial_secret_str: &str = concat!(
+        "7db5df06e7a69e432496adedb0085192", 
+        "3595221596ae2ae9fb8115c1e9ed0a44");
+    let mut initial_secret: Vec<u8> = hex::decode(initial_secret_str).unwrap();
+    initial_secret.resize(32, 0);
+
+    let client_initial_secret_str: &str = concat!(
+        "c00cf151ca5be075ed0ebfb5c80323c4",
+        "2d6b7db67881289af4008f1f6c357aea");
+    let mut client_initial_secret: Vec<u8> = hex::decode(client_initial_secret_str).unwrap();
+    client_initial_secret.resize(32, 0);
+
+    let client_key_str: &str = "1f369613dd76d5467730efcbe3b1a22d";
+    let mut client_key: Vec<u8> = hex::decode(client_key_str).unwrap();
+    client_key.resize(16, 0);
+
+    let client_iv_str: &str = "fa044b2f42a3fd3b46fb255c";
+    let mut client_iv: Vec<u8> = hex::decode(client_iv_str).unwrap();
+    client_iv.resize(12, 0);
+
+    let client_hp_str: &str = "9f50449e04a0e810283a1e9933adedd2";
+    let mut client_hp: Vec<u8> = hex::decode(client_hp_str).unwrap();
+    client_hp.resize(16, 0);
+
+    let server_initial_secret_str: &str = concat!(
+    "3c199828fd139efd216c155ad844cc81",
+    "fb82fa8d7446fa7d78be803acdda951b");
+    let mut server_initial_secret: Vec<u8> = hex::decode(server_initial_secret_str).unwrap();
+    server_initial_secret.resize(32, 0);
+
+    let server_key_str: &str = "cf3a5331653c364c88f0f379b6067e37";
+    let mut server_key: Vec<u8> = hex::decode(server_key_str).unwrap();
+    server_key.resize(16, 0);
+
+    let server_iv_str: &str = "0ac1493ca1905853b0bba03e";
+    let mut server_iv: Vec<u8> = hex::decode(server_iv_str).unwrap();
+    server_iv.resize(12, 0);
+
+    let server_hp_str: &str = "c206b8d9b9f0f37644430b490eeaa314";
+    let mut server_hp: Vec<u8> = hex::decode(server_hp_str).unwrap();
+    server_hp.resize(16, 0);
+    
+    let mut quic_keys: QuicKeySchedule = QuicKeySchedule::new();
+    quic_keys.generate_secrets(&destination_connection_id);
+    
+    assert_eq!(initial_secret, quic_keys.initial_secret.unwrap());
+    assert_eq!(client_initial_secret, quic_keys.client_initial_secret.unwrap());
+    assert_eq!(client_key, quic_keys.client_key.unwrap());
+    assert_eq!(client_iv, quic_keys.client_iv.unwrap());
+    assert_eq!(client_hp, quic_keys.client_hp_key.unwrap());
+    assert_eq!(server_initial_secret, quic_keys.server_initial_secret.unwrap());
+    assert_eq!(server_key, quic_keys.server_key.unwrap());
+    assert_eq!(server_iv, quic_keys.server_iv.unwrap());
+    assert_eq!(server_hp, quic_keys.server_hp_key.unwrap());
 }
