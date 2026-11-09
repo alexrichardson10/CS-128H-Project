@@ -94,7 +94,7 @@ impl Keys {
             self.private_key.clone().unwrap().try_into().unwrap(),
             client_public_key.try_into().unwrap()
         )));
-        
+
         self.shared_secret.clone().unwrap()
     }
 }

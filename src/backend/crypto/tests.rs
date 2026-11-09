@@ -1,8 +1,7 @@
-use crate::backend::crypto::diffie_hellman;
+use crate::backend::crypto::{aead_aes_128_gcm, diffie_hellman};
 use crate::backend::crypto::hkdf::{hkdf_expand, hkdf_extract};
 use num_bigint::BigUint;
 use crate::backend::crypto::quic::QuicKeySchedule;
-use crate::init;
 
 #[test]
 /// Tests the x25519 implementation against the RFC 7748 test keys found at
@@ -306,4 +305,55 @@ pub fn quic() {
     assert_eq!(server_key, quic_keys.server_key.unwrap());
     assert_eq!(server_iv, quic_keys.server_iv.unwrap());
     assert_eq!(server_hp, quic_keys.server_hp_key.unwrap());
+}
+
+/// Tests the aead_aes_128_gcm implementation against the test vector found at
+/// https://www.ieee802.org/1/files/public/docs2011/bn-randall-test-vectors-0511-v1.pdf.
+/// These vectors are not intended for QUIC use, and I can't find any that are
+/// (you lied to me IETF :C), so the IV is used as the nonce. This is equivalent to
+/// Using the IV as the IV but with a packet number of zero because the packet number is
+/// just XORed with the IV to make the nonce.
+#[test]
+pub fn aead_aes_128_gcm() {
+    // Test Vector per §2.2.1
+    let key: Vec<u8> = string_to_vec("AD7A2BD03EAC835A6F620FDCB506B345", 128 / 8);
+
+    let nonce: Vec<u8> = string_to_vec("12153524C0895E81B2C28465", 96 / 8);
+
+    let plaintext: Vec<u8> = string_to_vec(concat!(
+        "08000F101112131415161718191A1B1C",
+        "1D1E1F202122232425262728292A2B2C",
+        "2D2E2F303132333435363738393A0002"
+    ), 384 / 8);
+
+    let associated_data: Vec<u8> = string_to_vec(concat!(
+        "D609B1F056637A0D46DF998D88E52E00",
+        "B2C2846512153524C0895E81",
+    ), 224 / 8);
+
+    let ciphertext: Vec<u8> = string_to_vec(concat!(
+        "701AFA1CC039C0D765128A665DAB6924",
+        "3899BF7318CCDC81C9931DA17FBE8EDD",
+        "7D17CB8B4C26FC81E3284F2B7FBA713D"
+    ), 384 /8);
+
+    let auth_tag: Vec<u8> = string_to_vec("4F8D55E7D3F06FD5A13C0C29B9D5B880", 128 / 8);
+
+    let result: Vec<u8> = aead_aes_128_gcm::encrypt_with_nonce(
+        &key,
+        &nonce,
+        &associated_data,
+        &plaintext,
+    ).unwrap();
+
+    assert_eq!(ciphertext, result[0..(result.len() - auth_tag.len())]);
+    assert_eq!(auth_tag, result[(result.len() - auth_tag.len())..]);
+}
+
+/// Converts a hexadecimal string into a vector, given its length in bytes
+pub fn string_to_vec(text: &str, len: usize) -> Vec<u8> {
+    let mut vec: Vec<u8> = hex::decode(text).unwrap();
+    vec.resize(len, 0);
+
+    vec
 }
