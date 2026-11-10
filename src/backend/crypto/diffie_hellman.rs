@@ -17,7 +17,7 @@ pub fn x25519(mut k_bytes: [u8; 32], mut u_bytes: [u8; 32]) -> [u8; 32] {
     let mut x_2: BigUint = BigUint::one();
     let mut z_2: BigUint = BigUint::zero();
     let mut x_3: BigUint = u.clone();
-    let mut z_3 = BigUint::one();
+    let mut z_3: BigUint = BigUint::one();
     let a24: BigUint = BigUint::from(121665u128);
     let mut swap: BigUint = BigUint::zero();
     let two: BigUint = BigUint::from(2u32);

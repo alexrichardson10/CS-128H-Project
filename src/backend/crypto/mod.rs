@@ -9,3 +9,4 @@ mod tests;
 pub mod tls;
 pub mod quic;
 pub mod aead_aes_128_gcm;
+pub mod aes_128_ecb;
