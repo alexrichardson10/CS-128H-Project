@@ -293,18 +293,17 @@ pub fn quic() {
     let mut server_hp: Vec<u8> = hex::decode(server_hp_str).unwrap();
     server_hp.resize(16, 0);
     
-    let mut quic_keys: QuicKeySchedule = QuicKeySchedule::new();
-    quic_keys.generate_secrets(&destination_connection_id);
+    let quic_keys: QuicKeySchedule = QuicKeySchedule::from(&destination_connection_id);
     
     assert_eq!(initial_secret, quic_keys.initial_secret.unwrap());
     assert_eq!(client_initial_secret, quic_keys.client_initial_secret.unwrap());
-    assert_eq!(client_key, quic_keys.client_key.unwrap());
-    assert_eq!(client_iv, quic_keys.client_iv.unwrap());
-    assert_eq!(client_hp, quic_keys.client_hp_key.unwrap());
+    assert_eq!(client_key, quic_keys.client_initial_keys.as_ref().unwrap().key);
+    assert_eq!(client_iv, quic_keys.client_initial_keys.as_ref().unwrap().iv);
+    assert_eq!(client_hp, quic_keys.client_initial_keys.as_ref().unwrap().hp);
     assert_eq!(server_initial_secret, quic_keys.server_initial_secret.unwrap());
-    assert_eq!(server_key, quic_keys.server_key.unwrap());
-    assert_eq!(server_iv, quic_keys.server_iv.unwrap());
-    assert_eq!(server_hp, quic_keys.server_hp_key.unwrap());
+    assert_eq!(server_key, quic_keys.server_initial_keys.as_ref().unwrap().key);
+    assert_eq!(server_iv, quic_keys.server_initial_keys.as_ref().unwrap().iv);
+    assert_eq!(server_hp, quic_keys.server_initial_keys.as_ref().unwrap().hp);
 }
 
 /// Tests the aead_aes_128_gcm implementation against the test vector found at
@@ -353,6 +352,8 @@ pub fn aead_aes_128_gcm() {
 /// Converts a hexadecimal string into a vector, given its length in bytes
 pub fn string_to_vec(text: &str, len: usize) -> Vec<u8> {
     let mut vec: Vec<u8> = hex::decode(text).unwrap();
+
+    // this should never be necessary, but it's here in case someone does something stupid
     vec.resize(len, 0);
 
     vec
