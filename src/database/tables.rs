@@ -1,8 +1,4 @@
-use crate::database::ColumnType::*;
-use crate::database::Column;
-use crate::database::DbError;
-use crate::database::Schema;
-use crate::database::Row;
+use crate::database::{Row, Schema, DbError, Column, ColumnType::*};
 
 pub fn init_tables() -> Vec<(String, Schema)> {
     let user = Schema{cols: vec![
@@ -17,8 +13,8 @@ pub fn init_tables() -> Vec<(String, Schema)> {
 
 pub struct User {
     pub username: String,
-    pswdhash: String,
-    score: u32,
+    pub pswdhash: String,
+    pub score: u32,
 }
 
 impl TableStruct for User {
