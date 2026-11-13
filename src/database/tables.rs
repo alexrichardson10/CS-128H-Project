@@ -1,11 +1,7 @@
 use crate::database::{Row, Schema, DbError, Column, ColumnType::*};
 
 pub fn init_tables() -> Vec<(String, Schema)> {
-    let user = Schema{cols: vec![
-        (String::from("UserName"), CharVec),
-        (String::from("PswdHash"), CharVec),
-        (String::from("Score"), UInt),
-    ]};
+    let user = Schema{cols: vec![CharVec,CharVec,UInt]};
     vec![
         (String::from("user"), user),
     ]

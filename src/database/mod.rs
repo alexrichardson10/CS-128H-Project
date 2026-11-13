@@ -54,7 +54,7 @@ impl Database {
                 let pk: u32 = parse_as(cols[0])?;
                 let mut row = Row::new();
                 for (coltype, col) in cols[1..].iter().enumerate() {
-                    row.datacols.push(schema.cols[coltype].1.map_string(col)?);
+                    row.datacols.push(schema.cols[coltype].map_string(col)?);
                 }
                 table.insert(pk, T::from(row)?);
                 offset_map.insert(pk, totaloffset);
@@ -155,7 +155,7 @@ fn parse_as<T: FromStr>(input: &str) -> Result<T, DbError> {
 }
 
 pub struct Schema {
-    cols: Vec<(String, ColumnType)>,
+    cols: Vec<ColumnType>,
 }
 
 pub struct Row {
