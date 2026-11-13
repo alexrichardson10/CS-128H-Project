@@ -56,7 +56,7 @@ impl Database {
                 for (coltype, col) in cols[1..].iter().enumerate() {
                     row.datacols.push(schema.cols[coltype].1.map_string(col)?);
                 }
-                table.insert(pk, T::from(&row)?);
+                table.insert(pk, T::from(row)?);
                 offset_map.insert(pk, totaloffset);
             }
             totaloffset += line.len() as u64;
@@ -65,7 +65,7 @@ impl Database {
         Ok(Table{table: table, to_delete: vec![], to_append: vec![], byte_offset_map: offset_map})
     }
 
-    pub fn write_table<T: TableStruct>(&self, tablename: &String, table: Table<T>) -> Result<(), DbError> {
+    pub fn write_table<T: TableStruct>(&self, tablename: &String, mut table: Table<T>) -> Result<(), DbError> {
         let _schema = self.get_table(tablename)?;
 
         let mut file = OpenOptions::new()
@@ -85,7 +85,7 @@ impl Database {
 
         //addition loop
         for append_key in table.to_append {
-            let tablestruct = &table.table[&append_key];
+            let tablestruct = table.table.remove(&append_key).unwrap(); // take ownership with remove
             let rowstr = tablestruct.to().to_row_string(append_key);
             file.seek(SeekFrom::End(0))?;
             file.write_all(rowstr.as_bytes())?;

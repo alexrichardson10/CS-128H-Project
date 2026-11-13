@@ -19,30 +19,32 @@ pub struct User {
 
 impl TableStruct for User {
 
-    fn from(data: &Row) -> Result<Self, DbError> {
+    fn from(data: Row) -> Result<Self, DbError> {
         if data.datacols.len() != 3 {
             return Err(DbError::ColFormat);
         }
-        match &data.datacols[..] {
-            [ 
-                Column::CharVec(un), 
-                Column::CharVec(hash), 
-                Column::UInt(score)
-            ] => 
-                Ok(User{
-                    username: un.clone(),
-                    pswdhash: hash.clone(),
-                    score: *score,
-                }),
-            _ => Err(DbError::ColFormat),
-        }
+
+        let mut datacols = data.datacols.into_iter();
+        let username = match datacols.next().unwrap() {
+            Column::CharVec(un) => un,
+            _ => return Err(DbError::ColFormat),
+        };
+        let pswdhash = match datacols.next().unwrap() {
+            Column::CharVec(hash) => hash,
+            _ => return Err(DbError::ColFormat),
+        };
+        let score = match datacols.next().unwrap() {
+            Column::UInt(score) => score,
+            _ => return Err(DbError::ColFormat),
+        };
+        Ok(User{username: username, pswdhash: pswdhash, score: score})
     }
 
-    fn to(&self) -> Row {
+    fn to(self) -> Row {
         Row{
             datacols: vec![
-            Column::CharVec(self.username.clone()),
-            Column::CharVec(self.pswdhash.clone()),
+            Column::CharVec(self.username),
+            Column::CharVec(self.pswdhash),
             Column::UInt(self.score),
         ]
         }
@@ -51,7 +53,7 @@ impl TableStruct for User {
 }
 
 pub trait TableStruct: Sized {
-    fn from(data: &Row) -> Result<Self, DbError>;
+    fn from(data: Row) -> Result<Self, DbError>;
 
-    fn to(&self) -> Row;
+    fn to(self) -> Row;
 }
