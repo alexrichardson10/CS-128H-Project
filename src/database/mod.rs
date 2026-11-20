@@ -4,6 +4,7 @@ use std::io::{BufRead, BufReader, Seek, SeekFrom, Write};
 use std::path::Path;
 use std::fs::{self, File, OpenOptions};
 use std::str::FromStr;
+use hex::{encode, decode};
 
 use crate::database::tables::TableStruct;
 
@@ -110,6 +111,7 @@ pub enum Column {
     Int(i32),
     CharVec(String),
     Double(f64),
+    VecU8(Vec<u8>),
 }
 
 impl Column {
@@ -120,6 +122,7 @@ impl Column {
             Column::Int(x) => x.to_string(),
             Column::CharVec(x) => x.to_string(),
             Column::Double(x) => x.to_string(),
+            Column::VecU8(x) => encode(x),
         }
     }
 }
@@ -130,6 +133,7 @@ enum ColumnType {
     Int,
     CharVec,
     Double,
+    VecU8,
 }
 
 
@@ -142,6 +146,7 @@ impl ColumnType {
             ColumnType::Int => return Ok(Column::Int(parse_as(input)?)),
             ColumnType::Double => return Ok(Column::Double(parse_as(input)?)),
             ColumnType::CharVec => return Ok(Column::CharVec(String::from(input))),
+            ColumnType::VecU8 => return Ok(Column::VecU8(parse_hex(input)?)),
         };
     }
 
@@ -151,6 +156,13 @@ fn parse_as<T: FromStr>(input: &str) -> Result<T, DbError> {
     match input.parse::<T>() {
         Ok(thing) => Ok(thing),
         Err(_) => Err(DbError::Parse),
+    }
+}
+
+fn parse_hex(input: &str) -> Result<Vec<u8>, DbError> {
+    match decode(input) {
+        Ok(data) => Ok(data),
+        Err(_) => Err(DbError::HexDecodeError),
     }
 }
 
@@ -229,6 +241,7 @@ pub enum DbError {
     FileNotFound,
     TableNotFound,
     RowNotFound,
+    HexDecodeError,
 }
 
 impl From<std::io::Error> for DbError {

@@ -1,7 +1,7 @@
 use crate::database::{Row, Schema, DbError, Column, ColumnType::*};
 
 pub fn init_tables() -> Vec<(String, Schema)> {
-    let user = Schema{cols: vec![CharVec,CharVec,UInt]};
+    let user = Schema{cols: vec![CharVec,CharVec,UInt,VecU8]};
     vec![
         (String::from("user"), user),
     ]
@@ -11,12 +11,13 @@ pub struct User {
     pub username: String,
     pub pswdhash: String,
     pub score: u32,
+    pub keys: Vec<u8>,
 }
 
 impl TableStruct for User {
 
     fn from(data: Row) -> Result<Self, DbError> {
-        if data.datacols.len() != 3 {
+        if data.datacols.len() != 4 {
             return Err(DbError::ColFormat);
         }
 
@@ -33,7 +34,11 @@ impl TableStruct for User {
             Column::UInt(score) => score,
             _ => return Err(DbError::ColFormat),
         };
-        Ok(User{username: username, pswdhash: pswdhash, score: score})
+        let keys = match datacols.next().unwrap() {
+            Column::VecU8(keys) => keys,
+            _ => return Err(DbError::ColFormat),
+        };
+        Ok(User{username: username, pswdhash: pswdhash, score: score, keys: keys})
     }
 
     fn to(self) -> Row {
@@ -42,6 +47,7 @@ impl TableStruct for User {
             Column::CharVec(self.username),
             Column::CharVec(self.pswdhash),
             Column::UInt(self.score),
+            Column::VecU8(self.keys),
         ]
         }
     }
