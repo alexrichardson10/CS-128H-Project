@@ -65,12 +65,14 @@ pub fn encrypt (
     encrypt_with_nonce(server_key, &nonce, associated_data, plaintext)
 }
 
+/// Generates the nonce from the provided data.
 pub fn decrypt (
     server_key: &Vec<u8>,
     packet_protection_iv: &Vec<u8>,
     packet_number: &Vec<u8>,
     associated_data: &Vec<u8>,
-    cyphertext: &Vec<u8>
+    cyphertext: &Vec<u8>,
+    authentication_tag: &Vec<u8>
 ) -> Result<Vec<u8>, AeadError> {
     let mut nonce: Vec<u8> = packet_protection_iv.clone();
     let nonce_len = nonce.len();
@@ -85,8 +87,13 @@ pub fn decrypt (
     let nonce: Array<u8, U12> = Array(<[u8; 12]>::try_from(nonce.clone()).unwrap());
     let n = Nonce::try_from(nonce).unwrap();
 
+    let mut text: Vec<u8> = cyphertext.clone();
+    for i in authentication_tag {
+        text.push(*i);
+    }
+
     let payload: Payload = Payload {
-        msg: cyphertext,
+        msg: &text,
         aad: associated_data
     };
 

@@ -2,6 +2,7 @@ use crate::backend::quic::header::{LongHeader, QuicHeaderError};
 
 pub mod crypto;
 pub mod quic;
+pub mod utils;
 
 pub fn run() {
     let mut packet: Vec<u8> = Vec::new();

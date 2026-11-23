@@ -2,6 +2,7 @@ use crate::backend::crypto::{aead_aes_128_gcm, diffie_hellman};
 use crate::backend::crypto::hkdf::{hkdf_expand, hkdf_extract};
 use num_bigint::BigUint;
 use crate::backend::crypto::quic::QuicKeySchedule;
+use crate::backend::utils::string_to_vec;
 
 #[test]
 /// Tests the x25519 implementation against the RFC 7748 test keys found at
@@ -347,14 +348,4 @@ pub fn aead_aes_128_gcm() {
 
     assert_eq!(ciphertext, result[0..(result.len() - auth_tag.len())]);
     assert_eq!(auth_tag, result[(result.len() - auth_tag.len())..]);
-}
-
-/// Converts a hexadecimal string into a vector, given its length in bytes
-pub fn string_to_vec(text: &str, len: usize) -> Vec<u8> {
-    let mut vec: Vec<u8> = hex::decode(text).unwrap();
-
-    // this should never be necessary, but it's here in case someone does something stupid
-    vec.resize(len, 0);
-
-    vec
 }

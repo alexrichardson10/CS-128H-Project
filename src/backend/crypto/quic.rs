@@ -53,7 +53,7 @@ impl QuicKeySchedule {
     pub fn from(client_dst_connection_id: &Vec<u8>) -> QuicKeySchedule {
         let mut result: QuicKeySchedule = QuicKeySchedule::new();
         result.generate_initial_secrets(client_dst_connection_id);
-        
+
         result
     }
 
@@ -79,7 +79,7 @@ impl QuicKeySchedule {
             &Vec::new(),
             32u16
         ));
-        
+
         self.client_initial_keys = Some(KeySet::new(
             &self.client_initial_secret.as_ref().unwrap(),
         ));
