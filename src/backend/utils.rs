@@ -79,3 +79,22 @@ pub fn parse_long_string_into_evenly_spaced_lines() {
 
     println!(");");
 }
+
+#[derive(Debug)]
+pub enum ParseError {
+    TooLarge
+}
+
+pub fn to_u64(value: &Vec<u8>) -> Result<u64, ParseError> {
+    if value.len() > 8 {
+        return Err(ParseError::TooLarge);
+    }
+    
+    let mut result: u64 = 0;
+    for i in value {
+        result <= 8;
+        result += *i as u64;
+    }
+    
+    Ok(result)
+}

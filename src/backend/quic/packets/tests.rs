@@ -2,7 +2,9 @@
 //! that are used in their implementations.
 
 use crate::backend::quic::packets::initial::InitialPacket;
+use crate::backend::quic::packets::Packet;
 use crate::backend::quic::packets::utils::decode_variable_length_integer;
+use crate::backend::server::Server;
 use crate::backend::utils::string_to_vec;
 
 #[test]
@@ -37,7 +39,9 @@ pub fn variable_length_integers() {
 
 #[test]
 /// This attempts to parse the client's initial packet
-/// please work :((((
+/// please work :(
+/// This test case doesn't really need assertions because not panicking
+/// indicates that it was parsed correctly.
 pub fn client_initial() {
     let packet: Vec<u8> = hex::decode(concat!(
     "c000000001088394c8f03e5157080000449e7b9aec34d1b1c98dd7689fb8ec11",
@@ -80,8 +84,19 @@ pub fn client_initial() {
     "e221af44860018ab0856972e194cd934",
     )).unwrap();
 
-    let parsed_packet: InitialPacket = InitialPacket::from(packet);
-    println!("{:?}", parsed_packet);
-    println!("Payload: {:?}", hex::encode(parsed_packet.packet_payload));
-    println!("Authentication Tag: {:?}", hex::encode(parsed_packet.authentication_tag));
+    let mut server: Server = Server::new();
+    let packet2: Packet = server.parse_packet(&packet).unwrap();
+    let parsed_packet: InitialPacket;
+    match packet2 {
+        Packet::Initial(p) => parsed_packet = p,
+    }
+
+    // let parsed_packet: InitialPacket = InitialPacket::from(packet.clone());
+    // println!("Payload: {:?}", hex::encode(parsed_packet.packet_payload));
+    // println!("Authentication Tag: {:?}", hex::encode(parsed_packet.authentication_tag));
+    println!("Frames: {:?}", parsed_packet.frames);
+
+    let serialized_packet: Vec<u8> = parsed_packet.serialize();
+
+    assert_eq!(packet, serialized_packet);
 }

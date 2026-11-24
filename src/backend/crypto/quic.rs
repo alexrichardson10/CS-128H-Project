@@ -1,5 +1,6 @@
 use crate::backend::crypto::hkdf::{hkdf_expand_label, hkdf_extract};
 
+#[derive(Clone)]
 pub struct KeySet {
     pub key: Vec<u8>, // aead
     pub iv: Vec<u8>, // initialization vector
